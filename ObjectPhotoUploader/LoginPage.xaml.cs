@@ -27,6 +27,8 @@ namespace ObjectPhotoUploader
     /// </summary>
     public sealed partial class LoginPage : Page
     {
+
+        ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
         public LoginPage()
         {
             this.InitializeComponent();
@@ -39,14 +41,14 @@ namespace ObjectPhotoUploader
             {
                 SetLoading(true);
                 string token = await api.login(Username.Text, Password.Password);
-                ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+            
                 localSettings.Values["AuthToken"] = token;
-                System.Diagnostics.Debug.WriteLine(token);
+                localSettings.Values["username"] = Username.Text;
                 this.Frame.Navigate(typeof(HomePage));
             } catch (FlurlHttpException ex)
             {
                 LoginError err = await ex.GetResponseJsonAsync<LoginError>();
-                Status.Text = String.Join("\n", err.non_field_errors);
+                Status.Text = string.Join("\n", err.non_field_errors);
             } finally
             {
                 SetLoading(false);
