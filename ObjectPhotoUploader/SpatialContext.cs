@@ -34,6 +34,13 @@ namespace ObjectPhotoUploader
         public string director_notes { get; set; }
         public List<ContextphotoSet> contextphoto_set { get; set; }
         public List<BagphotoSet> bagphoto_set { get; set; }
+
+        public override string ToString()
+        {
+            return string.Format("{0}.{1}.{2}.{3}.{4}", 
+                utm_hemisphere, utm_zone, area_utm_easting_meters, area_utm_northing_meters, context_number);
+        }
+
     }
 
 

@@ -26,16 +26,26 @@
         </StackPanel>
         <StackPanel Grid.Row="1" Orientation="Horizontal">
             <ComboBox x:Name="utm_hemisphere" Margin="15,0,10,0" VerticalAlignment="Center"
-                      ItemsSource="{x:Bind hemispheres}" Header="Hemisphere"
+                      ItemsSource="{x:Bind hemispheres, Mode=OneWay}" Header="Hemisphere" DropDownClosed="utm_hemisphere_DropDownClosed"
                       />
             <ComboBox x:Name="utm_zone" Margin="0,0,10,0" VerticalAlignment="Center"
-                      Header="Zone"
+                      ItemsSource="{x:Bind zones, Mode=OneWay}" Header="Zone" DropDownClosed="utm_zone_DropDownClosed"
                       />
             <ComboBox x:Name="utm_easting" Margin="0,0,10,0" VerticalAlignment="Center"
-                      Header="Easting"
+                      ItemsSource="{x:Bind eastings, Mode=Oneway}" Header="Easting" DropDownClosed="utm_easting_DropDownClosed"
                       />
-            <ComboBox x:Name="utm_northing" VerticalAlignment="Center" 
-                      Header="Northing"
+            <ComboBox x:Name="utm_northing" Margin="0,0,10,0" VerticalAlignment="Center"
+                      ItemsSource="{x:Bind northings, Mode=OneWay}" Header="Northing" DropDownClosed="utm_northing_DropDownClosed"
+                      />
+            <ComboBox x:Name="context_number" Margin="0,0,10,0" VerticalAlignment="Center" 
+                      ItemsSource="{x:Bind contextNumbers, Mode=OneWay}" Header="Context" DropDownClosed="context_number_DropDownClosed"
+                      />
+            <TextBlock VerticalAlignment="Center" Margin="10,0,10,0">
+                <Run Text="Selected Context:" />
+                <Run Text="{x:Bind selectedContext.ToString(), Mode=OneWay}" />
+            </TextBlock>
+            <ComboBox x:Name="object_find" Margin="10,0,10,0" VerticalAlignment="Center" 
+                      ItemsSource="{x:Bind findNumbers, Mode=OneWay}" Header="Object Find" DropDownClosed="object_find_DropDownClosed"
                       />
         </StackPanel>
         <Grid Grid.Row="2">

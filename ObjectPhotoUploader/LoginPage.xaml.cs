@@ -60,6 +60,15 @@ namespace ObjectPhotoUploader
             ProgBar.Visibility = isLoading ? Visibility.Visible : Visibility.Collapsed;
             LoginButton.IsEnabled = !isLoading;
         }
+
+        private void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (localSettings.Values.ContainsKey("AuthToken"))
+            {
+                this.Frame.Navigate(typeof(HomePage));
+            }
+
+        }
     }
 
     class LoginError
