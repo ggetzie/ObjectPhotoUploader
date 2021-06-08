@@ -47,8 +47,9 @@ namespace ObjectPhotoUploader
                 this.Frame.Navigate(typeof(HomePage));
             } catch (FlurlHttpException ex)
             {
-                LoginError err = await ex.GetResponseJsonAsync<LoginError>();
-                Status.Text = string.Join("\n", err.non_field_errors);
+                // LoginError err = await ex.GetResponseJsonAsync<LoginError>();
+                string err = await ex.GetResponseStringAsync();
+                Status.Text = err;
             } finally
             {
                 SetLoading(false);

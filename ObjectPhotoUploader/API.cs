@@ -12,7 +12,8 @@ namespace ObjectPhotoUploader
 {
     class API
     {
-        private string _baseurl = "https://j20200007.kotsf.com";
+        // private string _baseurl = "https://j20200007.kotsf.com";
+        private string _baseurl = "http://localhost:8000";
 
         public async Task<string> login(string username, string password)
         {
@@ -27,23 +28,26 @@ namespace ObjectPhotoUploader
 
         private string getCurrentToken()
         {
+            // return current access token formatted for inclusion in header
             ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
-            return (string)localSettings.Values["AuthToken"];
+            return string.Format("Token {0}", (string)localSettings.Values["AuthToken"]);
         }
 
         public async Task<IList<SpatialContext>> GetSpatialContextsAsync()
         {
-            string token = string.Format("Token {0}", getCurrentToken());
+            string token = getCurrentToken();
             string contextListURL = _baseurl.AppendPathSegment("api/context") + "/";
 
-            IList<SpatialContext> c = await contextListURL.WithHeader("Authorization", token).GetJsonAsync<IList<SpatialContext>>();
+            IList<SpatialContext> c = await contextListURL
+                .WithHeader("Authorization", token)
+                .GetJsonAsync<IList<SpatialContext>>();
 
             return c;
         }
 
         public async Task<IList<ObjectFind>> GetObjectFindsAsync(SpatialContext sc)
         {
-            string token = string.Format("Token {0}", getCurrentToken());
+            string token = getCurrentToken();
             string url = _baseurl
                 .AppendPathSegment("api/find")
                 .AppendPathSegments(
@@ -54,7 +58,6 @@ namespace ObjectPhotoUploader
                 sc.context_number) + "/";
             
             ObjectFindRoot root = await url.WithHeader("Authorization", token).GetJsonAsync<ObjectFindRoot>();
-            System.Diagnostics.Debug.WriteLine(root.results);
             IList<ObjectFind> finds = root.results;
             int i = 0;
             while (finds.Count() < root.count && i < 20)
@@ -66,6 +69,36 @@ namespace ObjectPhotoUploader
             }
             finds = finds.OrderByDescending(x => x.find_number).ToList<ObjectFind>();
             return finds;
+        }
+
+        public async Task<ObjectFind> CreateObjectFindAsync(SpatialContext sc)
+        {
+            string token = getCurrentToken();
+            string url = _baseurl
+                .AppendPathSegment("api/find") + "/";
+            var data = new
+            {
+                utm_hemisphere = sc.utm_hemisphere,
+                utm_zone = sc.utm_zone,
+                area_utm_easting_meters = sc.area_utm_easting_meters,
+                area_utm_northing_meters = sc.area_utm_northing_meters,
+                context_number = sc.context_number
+            };
+            ObjectFind newFind = await url.WithHeader("Authorization", token)
+                .PostJsonAsync(data).ReceiveJson<ObjectFind>();
+            return newFind;
+        }
+
+        public async Task<IList<MaterialCategory>> GetMaterialCategoriesAsync()
+        {
+            string token = getCurrentToken();
+            string url = _baseurl
+                .AppendPathSegment("api/find/mc") + "/";
+            IList<MaterialCategory> mcs = await url
+                .WithHeader("Authorization", token)
+                .GetJsonAsync<IList<MaterialCategory>>();
+            return mcs;
+
         }
     }
 

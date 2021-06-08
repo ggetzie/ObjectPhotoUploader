@@ -9,23 +9,35 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Grid>
+    <Grid Padding="10,10,10,10">
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
             <RowDefinition Height="100"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="50"/>
         </Grid.RowDefinitions>
-        <StackPanel x:Name="TopControls" Grid.Row="0" Orientation="Horizontal" FlowDirection="RightToLeft">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <StackPanel x:Name="TopControls" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" FlowDirection="RightToLeft">
+            <Button x:Name="logout" Content="Logout" HorizontalAlignment="Right" Click="logout_Click"/>
             <TextBlock 
                 HorizontalAlignment="Right" 
                 Margin="25 0 25 0" 
                 VerticalAlignment="Center"><Run Text="Hello" /><Run Text=" "/><Run Text="{x:Bind Mode=OneWay, Path=username}" />
             </TextBlock>
-            <Button x:Name="logout" Content="Logout" HorizontalAlignment="Right" Click="logout_Click"/>
+            <TextBlock VerticalAlignment="Center" Margin="10, 0, 10, 0">
+                <Run Text="Selected Find:" />
+                <Run Text="{x:Bind selectedFind.find_number, Mode=OneWay}" />
+            </TextBlock>
+            <TextBlock VerticalAlignment="Center" Margin="10,0,10,0">
+                <Run Text="Selected Context:" />
+                <Run Text="{x:Bind selectedContext.ToString(), Mode=OneWay}" />
+            </TextBlock>
         </StackPanel>
-        <StackPanel Grid.Row="1" Orientation="Horizontal">
-            <ComboBox x:Name="utm_hemisphere" Margin="15,0,10,0" VerticalAlignment="Center"
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Grid.ColumnSpan="2" VerticalAlignment="Stretch">
+            <ComboBox x:Name="utm_hemisphere" Margin="0,0,10,0" VerticalAlignment="Center"
                       ItemsSource="{x:Bind hemispheres, Mode=OneWay}" Header="Hemisphere" DropDownClosed="utm_hemisphere_DropDownClosed"
                       />
             <ComboBox x:Name="utm_zone" Margin="0,0,10,0" VerticalAlignment="Center"
@@ -40,29 +52,54 @@
             <ComboBox x:Name="context_number" Margin="0,0,10,0" VerticalAlignment="Center" 
                       ItemsSource="{x:Bind contextNumbers, Mode=OneWay}" Header="Context" DropDownClosed="context_number_DropDownClosed"
                       />
-            <TextBlock VerticalAlignment="Center" Margin="10,0,10,0">
-                <Run Text="Selected Context:" />
-                <Run Text="{x:Bind selectedContext.ToString(), Mode=OneWay}" />
-            </TextBlock>
-            <ComboBox x:Name="object_find" Margin="10,0,10,0" VerticalAlignment="Center" 
+            <ComboBox x:Name="object_find" Margin="0,0,10,0" VerticalAlignment="Center" 
                       ItemsSource="{x:Bind findNumbers, Mode=OneWay}" Header="Object Find" DropDownClosed="object_find_DropDownClosed"
                       />
+            <Button x:Name="new_find" Content="New Find" Margin="0,22,0,0">
+                <Button.Flyout>
+                    <Flyout x:Name="create_object_find_fo">
+                        <StackPanel Padding="5,5,5,5">
+                            <TextBlock>
+                                <Run Text="Create New Find in Context" />
+                                <Run Text="{x:Bind selectedContext.ToString(), Mode=OneWay}" />
+                            </TextBlock>
+                            <StackPanel Orientation="Horizontal">
+                                <ComboBox x:Name="material_cb" 
+                                          ItemsSource="{x:Bind materials, Mode=OneWay}"
+                                          VerticalAlignment="Center"
+                                          Margin="0,0,10,0"
+                                          Header="Material" DropDownClosed="material_cb_DropDownClosed"
+                                          />
+                                <ComboBox x:Name="category_cb"
+                                          ItemsSource="{x:Bind categories, Mode=OneWay}"
+                                          VerticalAlignment="Center"
+                                          Header="Category"
+                                          />
+                            </StackPanel>
+                        </StackPanel>
+                    </Flyout>
+                </Button.Flyout>
+            </Button>
+
         </StackPanel>
-        <Grid Grid.Row="2">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <Custom:AnimatedVisualPlayer HorizontalAlignment="Left" Height="9" Margin="236,188,0,0" VerticalAlignment="Top" Width="3"/>
-        </Grid>
-        <StackPanel Orientation="Horizontal" Grid.Row="3">
+        <StackPanel Grid.Row="2" Grid.Column="0">
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="selectFolder" Content="Select Folder" Margin="5 5 5 5" Click="selectFolder_Click" />
+                <TextBlock Margin="5 5 10 10" VerticalAlignment="Center">
+                    <Run Text="Watching Folder:"/>
+                    <Run Text="{x:Bind selectedFolder.Path, Mode=OneWay}" />
+                </TextBlock>
+            </StackPanel>
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.ColumnSpan="2">
             <TextBlock HorizontalAlignment="Center"
                        VerticalAlignment="Center"
-                       x:Name="status"
+                       x:Name="status" Margin="0,0,0,0"
                    />
             <ProgressBar x:Name="progbar"
                          Visibility="Collapsed"
-                         IsIndeterminate="True"
+                         IsIndeterminate="True" Margin="20,0,-2.2,0"
                          />
         </StackPanel>
     </Grid>

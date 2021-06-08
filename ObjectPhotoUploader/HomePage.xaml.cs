@@ -33,20 +33,25 @@ namespace ObjectPhotoUploader
         ObservableCollection<int> eastings = new ObservableCollection<int>();
         ObservableCollection<int> northings = new ObservableCollection<int>();
         ObservableCollection<int> contextNumbers = new ObservableCollection<int>();
+        ObservableCollection<string> materials = new ObservableCollection<string>();
+        ObservableCollection<string> categories = new ObservableCollection<string>();
         // string soloTip = "Only one value is available in the current context list";
         IList<SpatialContext> contexts;
+        IList<MaterialCategory> materialCategories;
         SpatialContext selectedContext;
         ObjectFind selectedFind;
         // bool contextIsSelected = false;
         ObservableCollection<int> findNumbers = new ObservableCollection<int>();
         IList<ObjectFind> objectFinds;
+        Windows.Storage.StorageFolder selectedFolder;
 
         API api = new API();
         public HomePage()
         {
             this.InitializeComponent();
             username = (string)localSettings.Values["username"];
-            loadContexts();
+            LoadContexts();
+            LoadMaterialCategories();
         }
 
         private void logout_Click(object sender, RoutedEventArgs e)
@@ -55,28 +60,65 @@ namespace ObjectPhotoUploader
             Frame.Navigate(typeof(LoginPage));
         }
 
-        private void setLoading(bool isLoading, string msg)
+        private void setLoading(bool isLoading, string msg, bool append = false)
         {
-            status.Text = msg;
+            if (append)
+            {
+                status.Text += "\n" + msg;
+            } else
+            {
+                status.Text = msg;
+            }
+            
             progbar.Visibility = isLoading ? Visibility.Visible : Visibility.Collapsed;
         }
 
-        private async void loadContexts()
+        private async void LoadContexts()
         {
             try
             {
                 setLoading(true, "Loading Spatial Contexts..");
                 contexts = await api.GetSpatialContextsAsync();
-                hemisphereOptions();
+                HemisphereOptions();
                 setLoading(false, "");
             }
             catch (FlurlHttpException ex)
             {
-                setLoading(false, ex.Message);
+                string err = await ex.GetResponseStringAsync();
+                setLoading(false, err);
             }
         }
 
-        private void hemisphereOptions()
+        private async void LoadMaterialCategories()
+        {
+            try
+            {
+                setLoading(true, "Loading Material Categories...", true);
+                materialCategories = await api.GetMaterialCategoriesAsync();
+                materials = new ObservableCollection<string>(materialCategories.Select(x => x.material).Distinct());
+                setLoading(false, "");
+            } catch (FlurlHttpException ex)
+            {
+                string err = await ex.GetResponseStringAsync();
+                setLoading(false, err);
+            }
+        }
+
+        private void CategoryOptions()
+        {
+            IEnumerable<string> cats = materialCategories
+                .Where(x => x.material == (string)material_cb.SelectedItem)
+                .Select(x => x.category)
+                .Distinct();
+            categories.Clear();
+            foreach (string c in cats)
+            {
+                categories.Add(c);
+            }
+            Bindings.Update();
+        }
+
+        private void HemisphereOptions()
         {
             IEnumerable<string> hems = contexts.Select(x => x.utm_hemisphere).Distinct();
             hemispheres.Clear();
@@ -89,11 +131,11 @@ namespace ObjectPhotoUploader
             {
                 utm_hemisphere.SelectedItem = hemispheres[0];
                 utm_hemisphere.IsEnabled = false;
-                zoneOptions();
+                ZoneOptions();
             }
         }
 
-        private void zoneOptions()
+        private void ZoneOptions()
         {
             IEnumerable<int> distinct_zones = contexts
                 .Where(x => x.utm_hemisphere == (string)utm_hemisphere.SelectedItem)
@@ -107,11 +149,12 @@ namespace ObjectPhotoUploader
             {
                 utm_zone.SelectedItem = zones[0];
                 utm_zone.IsEnabled = false;
-                eastingOptions();
+                EastingOptions();
             }
         }
 
-        private void eastingOptions()
+
+        private void EastingOptions()
         {
             IEnumerable<int> distinct_eastings = contexts
                 .Where(x => x.utm_hemisphere == (string)utm_hemisphere.SelectedItem &&
@@ -147,11 +190,11 @@ namespace ObjectPhotoUploader
             {
                 utm_northing.SelectedItem = northings[0];
                 utm_northing.IsEnabled = false;
-                cnOptions();
+                CnOptions();
             }
         }
 
-        private void cnOptions()
+        private void CnOptions()
         {
             IEnumerable<int> distinctCN = contexts
                 .Where(x => x.utm_hemisphere == (string)utm_hemisphere.SelectedItem &&
@@ -175,7 +218,7 @@ namespace ObjectPhotoUploader
         {
             if (utm_hemisphere.SelectedIndex > -1)
             {
-                zoneOptions();
+                ZoneOptions();
                 eastings.Clear();
                 northings.Clear();
                 contextNumbers.Clear();
@@ -186,7 +229,7 @@ namespace ObjectPhotoUploader
         {
             if (utm_zone.SelectedIndex > -1)
             {
-                eastingOptions();
+                EastingOptions();
                 northings.Clear();
                 contextNumbers.Clear();
             }
@@ -205,7 +248,7 @@ namespace ObjectPhotoUploader
 
             if (utm_northing.SelectedIndex > -1)
             {
-                cnOptions();
+                CnOptions();
             }
         }
 
@@ -245,6 +288,81 @@ namespace ObjectPhotoUploader
            if (object_find.SelectedIndex > -1)
             {
                 selectedFind = objectFinds.Single(x => x.find_number == (int)object_find.SelectedItem);
+                Bindings.Update();
+            }
+        }
+
+        private async void selectFolder_Click(object sender, RoutedEventArgs e)
+        {
+            var folderPicker = new Windows.Storage.Pickers.FolderPicker();
+            folderPicker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.PicturesLibrary;
+            folderPicker.FileTypeFilter.Add("*");
+
+            Windows.Storage.StorageFolder folder = await folderPicker.PickSingleFolderAsync();
+
+            if (folder != null)
+            {
+                Windows.Storage.AccessCache.StorageApplicationPermissions
+                    .FutureAccessList.AddOrReplace("PickedFolderToken", folder);
+                selectedFolder = folder;
+            } else
+            {
+                status.Text = "Folder Select operation cancelled.";
+            }
+            Bindings.Update();
+
+        }
+
+        private async void new_find_Click(object sender, RoutedEventArgs e)
+        {
+            ContentDialog newFindDialog = new ContentDialog
+            {
+                Title = "Create New Find",
+                Content = string.Format(
+                    "A new Find will be created in context {0} with the next available find number.",
+                    selectedContext.ToString()),
+                PrimaryButtonText = "Continue",
+                CloseButtonText = "Cancel",
+                DefaultButton = ContentDialogButton.Primary
+            };
+            ContentDialogResult result = await newFindDialog.ShowAsync();
+
+            if (result == ContentDialogResult.Primary)
+            {
+                try
+                {
+                    setLoading(true, "Creating new find...");
+                    ObjectFind newFind;
+                    newFind = await api.CreateObjectFindAsync(selectedContext);
+                    objectFinds.Insert(0, newFind);
+                    findNumbers.Insert(0, newFind.find_number);
+                    status.Text = string.Format(
+                        "Created New Find in current context with number {0}",
+                        newFind.find_number);
+                    object_find.SelectedItem = newFind.find_number;
+                    setLoading(false, "");
+                } catch (FlurlHttpException ex)
+                {
+                    string errors = await ex.GetResponseStringAsync();
+                    System.Diagnostics.Debug.WriteLine(errors);
+                    setLoading(false, errors);
+                }
+            }
+            
+        }
+
+        private async void fadeoutStatus(string message, int timeout = 3000)
+        {
+            status.Text = message;
+            await System.Threading.Tasks.Task.Delay(timeout);
+            status.Text = "";
+        }
+
+        private void material_cb_DropDownClosed(object sender, object e)
+        {
+            if (material_cb.SelectedIndex > -1)
+            {
+                CategoryOptions();
             }
         }
     }
