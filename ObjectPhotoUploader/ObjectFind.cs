@@ -28,6 +28,41 @@ namespace ObjectPhotoUploader
         public List<Findphoto> findphoto_set { get; set; }
     }
 
+    public class ObjectFindData
+    {
+        public string utm_hemisphere { get; set; }
+        public int utm_zone { get; set; }
+        public int area_utm_easting_meters { get; set; }
+        public int area_utm_northing_meters { get; set; }
+        public int context_number { get; set; }
+        public string material { get; set; }
+        public string category { get; set; }
+        public object director_notes { get; set; }
+
+        public ObjectFindData(
+            string utm_hemisphere,
+            int utm_zone,
+            int area_utm_easting_meters,
+            int area_utm_northing_meters,
+            int context_number,
+            string material,
+            string category,
+            string director_notes
+            )
+        {
+            this.utm_hemisphere = utm_hemisphere;
+            this.utm_zone = utm_zone;
+            this.area_utm_easting_meters = area_utm_easting_meters;
+            this.area_utm_northing_meters = area_utm_northing_meters;
+            this.context_number = context_number;
+            this.material = material;
+            this.category = category;
+            this.director_notes = director_notes;
+
+        }
+
+    }
+
     public class ObjectFindRoot
     {
         public int count { get; set; }

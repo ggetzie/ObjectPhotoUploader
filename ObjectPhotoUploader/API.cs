@@ -71,19 +71,11 @@ namespace ObjectPhotoUploader
             return finds;
         }
 
-        public async Task<ObjectFind> CreateObjectFindAsync(SpatialContext sc)
+        public async Task<ObjectFind> CreateObjectFindAsync(ObjectFindData data)
         {
             string token = getCurrentToken();
             string url = _baseurl
                 .AppendPathSegment("api/find") + "/";
-            var data = new
-            {
-                utm_hemisphere = sc.utm_hemisphere,
-                utm_zone = sc.utm_zone,
-                area_utm_easting_meters = sc.area_utm_easting_meters,
-                area_utm_northing_meters = sc.area_utm_northing_meters,
-                context_number = sc.context_number
-            };
             ObjectFind newFind = await url.WithHeader("Authorization", token)
                 .PostJsonAsync(data).ReceiveJson<ObjectFind>();
             return newFind;

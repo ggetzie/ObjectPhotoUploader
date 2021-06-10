@@ -57,7 +57,7 @@
                       />
             <Button x:Name="new_find" Content="New Find" Margin="0,22,0,0">
                 <Button.Flyout>
-                    <Flyout x:Name="create_object_find_fo">
+                    <Flyout x:Name="new_find_fo">
                         <StackPanel Padding="5,5,5,5">
                             <TextBlock>
                                 <Run Text="Create New Find in Context" />
@@ -76,6 +76,26 @@
                                           Header="Category"
                                           />
                             </StackPanel>
+                            <TextBox x:Name="director_notes_tb" 
+                                     HorizontalAlignment="Center" 
+                                     Header="Director Notes" 
+                                     Margin="0,15,0,0"
+                                     Width="300"
+                                     Height="150"
+                                     />
+                            <StackPanel Orientation="Horizontal"
+                                        FlowDirection="RightToLeft"
+                                        Margin="0,15,0,0"
+                                        >
+                                <Button x:Name="new_find_submit" Content="Submit" 
+                                        Click="new_find_submit_Click" 
+                                        Margin="15,0,0,0"
+                                        />
+                            </StackPanel>
+                            <TextBlock x:Name="new_find_status" 
+                                       HorizontalAlignment="Stretch" Margin="10,0,0,0"
+                                       
+                                       />
                         </StackPanel>
                     </Flyout>
                 </Button.Flyout>
@@ -90,6 +110,16 @@
                     <Run Text="{x:Bind selectedFolder.Path, Mode=OneWay}" />
                 </TextBlock>
             </StackPanel>
+            <ListView x:Name="watched_folder_list" 
+                      IsItemClickEnabled="True"
+                      >
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding DisplayName}" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+                
+            </ListView>
         </StackPanel>
 
         <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.ColumnSpan="2">

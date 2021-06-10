@@ -28,6 +28,7 @@ namespace ObjectPhotoUploader
     {
         string username;
         ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+
         ObservableCollection<string> hemispheres = new ObservableCollection<string>();
         ObservableCollection<int> zones = new ObservableCollection<int>();
         ObservableCollection<int> eastings = new ObservableCollection<int>();
@@ -35,15 +36,17 @@ namespace ObjectPhotoUploader
         ObservableCollection<int> contextNumbers = new ObservableCollection<int>();
         ObservableCollection<string> materials = new ObservableCollection<string>();
         ObservableCollection<string> categories = new ObservableCollection<string>();
-        // string soloTip = "Only one value is available in the current context list";
+        ObservableCollection<int> findNumbers = new ObservableCollection<int>();
+
         IList<SpatialContext> contexts;
         IList<MaterialCategory> materialCategories;
+        IList<ObjectFind> objectFinds;
+
         SpatialContext selectedContext;
         ObjectFind selectedFind;
-        // bool contextIsSelected = false;
-        ObservableCollection<int> findNumbers = new ObservableCollection<int>();
-        IList<ObjectFind> objectFinds;
-        Windows.Storage.StorageFolder selectedFolder;
+
+        StorageFolder selectedFolder;
+        IReadOnlyList<StorageFile> fileList;
 
         API api = new API();
         public HomePage()
@@ -305,15 +308,16 @@ namespace ObjectPhotoUploader
                 Windows.Storage.AccessCache.StorageApplicationPermissions
                     .FutureAccessList.AddOrReplace("PickedFolderToken", folder);
                 selectedFolder = folder;
-            } else
-            {
-                status.Text = "Folder Select operation cancelled.";
+                fileList = await selectedFolder.GetFilesAsync();
+                watched_folder_list.ItemsSource = fileList;
+                StorageLibraryChangeTracker photoTracker = selectedFolder.TryGetChangeTracker();
+                photoTracker.Enable();
             }
             Bindings.Update();
 
         }
 
-        private async void new_find_Click(object sender, RoutedEventArgs e)
+        private async void new_find_submit_Click(object sender, RoutedEventArgs e)
         {
             ContentDialog newFindDialog = new ContentDialog
             {
@@ -333,7 +337,18 @@ namespace ObjectPhotoUploader
                 {
                     setLoading(true, "Creating new find...");
                     ObjectFind newFind;
-                    newFind = await api.CreateObjectFindAsync(selectedContext);
+                    ObjectFindData data = new ObjectFindData(
+                        selectedContext.utm_hemisphere,
+                        selectedContext.utm_zone,
+                        selectedContext.area_utm_easting_meters,
+                        selectedContext.area_utm_northing_meters,
+                        selectedContext.context_number,
+                        (string)material_cb.SelectedItem,
+                        (string)category_cb.SelectedItem,
+                        director_notes_tb.Text
+                        );
+
+                    newFind = await api.CreateObjectFindAsync(data);
                     objectFinds.Insert(0, newFind);
                     findNumbers.Insert(0, newFind.find_number);
                     status.Text = string.Format(
