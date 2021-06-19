@@ -15,6 +15,7 @@ using Windows.UI.Xaml.Navigation;
 using Windows.Storage;
 using System.Collections.ObjectModel;
 using Flurl.Http;
+using Windows.ApplicationModel.Background;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -47,6 +48,7 @@ namespace ObjectPhotoUploader
 
         StorageFolder selectedFolder;
         IReadOnlyList<StorageFile> fileList;
+        StorageLibraryChangeTracker photoTracker;
 
         API api = new API();
         public HomePage()
@@ -255,7 +257,7 @@ namespace ObjectPhotoUploader
             }
         }
 
-        private void context_number_DropDownClosed(object sender, object e)
+        private void Context_number_DropDownClosed(object sender, object e)
         {
             if (context_number.SelectedIndex > -1)
             {
@@ -295,29 +297,97 @@ namespace ObjectPhotoUploader
             }
         }
 
-        private async void selectFolder_Click(object sender, RoutedEventArgs e)
+        private async void SelectFolder_Click(object sender, RoutedEventArgs e)
         {
             var folderPicker = new Windows.Storage.Pickers.FolderPicker();
             folderPicker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.PicturesLibrary;
             folderPicker.FileTypeFilter.Add("*");
 
-            Windows.Storage.StorageFolder folder = await folderPicker.PickSingleFolderAsync();
+            StorageFolder folder = await folderPicker.PickSingleFolderAsync();
 
             if (folder != null)
             {
                 Windows.Storage.AccessCache.StorageApplicationPermissions
                     .FutureAccessList.AddOrReplace("PickedFolderToken", folder);
                 selectedFolder = folder;
+                setLoading(true, "Getting files from folder...");
                 fileList = await selectedFolder.GetFilesAsync();
-                watched_folder_list.ItemsSource = fileList;
-                StorageLibraryChangeTracker photoTracker = selectedFolder.TryGetChangeTracker();
-                photoTracker.Enable();
-            }
-            Bindings.Update();
+                setLoading(false, "");
 
+                // register the background task to watch this folder for changes
+                StorageLibrary picturesLibrary = await StorageLibrary.GetLibraryAsync(KnownLibraryId.Pictures);
+                StorageLibraryContentChangedTrigger trigger = StorageLibraryContentChangedTrigger.Create(picturesLibrary);
+                BackgroundTaskRegistration task = UploadPhotoTaskConfig.RegisterBackgroundTask(
+                    UploadPhotoTaskConfig.UploadPhotoTaskEntryPoint,
+                    UploadPhotoTaskConfig.UploadPhotoTaskName,
+                    trigger
+                    );
+                // Attach progress and completion handlers
+                task.Completed += OnUploadCompleted;
+                task.Progress += OnUploadProgress;
+
+
+                photoTracker = selectedFolder.TryGetChangeTracker();
+                photoTracker.Enable();
+                Bindings.Update();
+            }
         }
 
-        private async void new_find_submit_Click(object sender, RoutedEventArgs e)
+        private void OnUploadCompleted(IBackgroundTaskRegistration task, BackgroundTaskCompletedEventArgs args)
+        {
+            fadeoutStatus("Upload completed", 5000);
+        }
+
+        private void OnUploadProgress(IBackgroundTaskRegistration task, BackgroundTaskProgressEventArgs args)
+        {
+            fadeoutStatus("Upload in progress", 1000);
+        }
+
+        private async void GetChanges()
+        {
+            photoTracker = selectedFolder.TryGetChangeTracker();
+            photoTracker.Enable();
+
+            StorageLibraryChangeReader photoChangeReader = photoTracker.GetChangeReader();
+            IReadOnlyList<StorageLibraryChange> changeSet = await photoChangeReader.ReadBatchAsync();
+
+            foreach (StorageLibraryChange change in changeSet)
+            {
+                if (change.ChangeType == StorageLibraryChangeType.ChangeTrackingLost)
+                {
+                    System.Diagnostics.Debug.WriteLine("Resetting the change tracker");
+                    photoTracker.Reset();
+                    return;
+                }
+                if (change.IsOfType(StorageItemTypes.Folder))
+                {
+                    System.Diagnostics.Debug.WriteLine("Folder Change");
+                }
+                else if (change.IsOfType(StorageItemTypes.File))
+                {
+                    System.Diagnostics.Debug.WriteLine("File Change");
+                }
+                else if (change.IsOfType(StorageItemTypes.None))
+                {
+                    if (change.ChangeType == StorageLibraryChangeType.Deleted)
+                    {
+                        System.Diagnostics.Debug.WriteLine("File Deleted");
+                    }
+                }
+            }
+            await photoChangeReader.AcceptChangesAsync();
+        }
+
+
+        private async void PhotoAdded(Windows.Storage.Search.IStorageQueryResultBase sender, object args)
+        {
+            System.Diagnostics.Debug.WriteLine("Query Results Changed");
+            fileList = await sender.Folder.GetFilesAsync();
+            status.Text = string.Format("sender {0}", sender.ToString());
+            Bindings.Update();
+        }
+
+        private async void New_find_submit_Click(object sender, RoutedEventArgs e)
         {
             ContentDialog newFindDialog = new ContentDialog
             {
@@ -356,6 +426,10 @@ namespace ObjectPhotoUploader
                         newFind.find_number);
                     object_find.SelectedItem = newFind.find_number;
                     setLoading(false, "");
+                    new_find_fo.Hide();
+                    material_cb.SelectedIndex = -1;
+                    category_cb.SelectedIndex = -1;
+                    director_notes_tb.Text = "";
                 } catch (FlurlHttpException ex)
                 {
                     string errors = await ex.GetResponseStringAsync();
@@ -380,5 +454,69 @@ namespace ObjectPhotoUploader
                 CategoryOptions();
             }
         }
+
+        private bool ContextIsSelected()
+        {
+            return !(selectedContext is null);
+        }
+    }
+
+    public class UploadPhotoTaskConfig
+    {
+        public const string UploadPhotoTaskEntryPoint = "ObjectPhotoUploader.UploadPhotoBackgroundTask";
+        public const string UploadPhotoTaskName = "UploadPhotoBackgroundTask";
+        public static string UploadPhotoTaskProgress = "";
+        public static bool UploadPhotoTaskRegistered = false;
+
+        /// <summary>
+        /// Register a background task with the specified taskEntryPoint, name, trigger,
+        /// and condition (optional).
+        /// </summary>
+        /// <param name="taskEntryPoint">Task entry point for the background task.</param>
+        /// <param name="name">A name for the background task.</param>
+        /// <param name="trigger">The trigger for the background task.</param>
+        /// <param name="condition">An optional conditional event that must be true for the task to fire.</param>
+        
+        public static BackgroundTaskRegistration RegisterBackgroundTask(
+            string taskEntryPoint,
+            string name,
+            IBackgroundTrigger trigger
+            )
+        {
+            var requestTask = BackgroundExecutionManager.RequestAccessAsync();
+            var builder = new BackgroundTaskBuilder();
+            builder.Name = name;
+            builder.TaskEntryPoint = taskEntryPoint;
+            builder.SetTrigger(trigger);
+
+            BackgroundTaskRegistration task = builder.Register();
+            UpdateBackgroundRegistrationStatus(name, true);
+            var settings = ApplicationData.Current.LocalSettings;
+            settings.Values.Remove(name);
+            return task;
+        }
+
+        public static void UpdateBackgroundRegistrationStatus(string name, bool registered)
+        {
+            if (name == "UploadPhotoBackgroundTask")
+            {
+                UploadPhotoTaskRegistered = registered;
+            }
+        }
+
+        public static void UnregisterBackgroundTasks(string name)
+        {
+            foreach (var cur in BackgroundTaskRegistration.AllTasks)
+            {
+                if (cur.Value.Name == name)
+                {
+                    cur.Value.Unregister(true);
+                }
+            }
+            UpdateBackgroundRegistrationStatus(name, false);
+        }
+
+
+
     }
 }

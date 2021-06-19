@@ -50,12 +50,16 @@
                       ItemsSource="{x:Bind northings, Mode=OneWay}" Header="Northing" DropDownClosed="utm_northing_DropDownClosed"
                       />
             <ComboBox x:Name="context_number" Margin="0,0,10,0" VerticalAlignment="Center" 
-                      ItemsSource="{x:Bind contextNumbers, Mode=OneWay}" Header="Context" DropDownClosed="context_number_DropDownClosed"
+                      ItemsSource="{x:Bind contextNumbers, Mode=OneWay}" Header="Context" DropDownClosed="Context_number_DropDownClosed"
                       />
             <ComboBox x:Name="object_find" Margin="0,0,10,0" VerticalAlignment="Center" 
                       ItemsSource="{x:Bind findNumbers, Mode=OneWay}" Header="Object Find" DropDownClosed="object_find_DropDownClosed"
                       />
-            <Button x:Name="new_find" Content="New Find" Margin="0,22,0,0">
+            <Button x:Name="new_find" 
+                    Content="New Find" 
+                    Margin="0,22,0,0"
+                    IsEnabled="{x:Bind ContextIsSelected(), Mode=OneWay}"
+                    >
                 <Button.Flyout>
                     <Flyout x:Name="new_find_fo">
                         <StackPanel Padding="5,5,5,5">
@@ -88,7 +92,7 @@
                                         Margin="0,15,0,0"
                                         >
                                 <Button x:Name="new_find_submit" Content="Submit" 
-                                        Click="new_find_submit_Click" 
+                                        Click="New_find_submit_Click" 
                                         Margin="15,0,0,0"
                                         />
                             </StackPanel>
@@ -104,18 +108,19 @@
         </StackPanel>
         <StackPanel Grid.Row="2" Grid.Column="0">
             <StackPanel Orientation="Horizontal">
-                <Button x:Name="selectFolder" Content="Select Folder" Margin="5 5 5 5" Click="selectFolder_Click" />
+                <Button x:Name="SelectFolder" Content="Select Folder" Margin="5 5 5 5" Click="SelectFolder_Click" />
                 <TextBlock Margin="5 5 10 10" VerticalAlignment="Center">
                     <Run Text="Watching Folder:"/>
                     <Run Text="{x:Bind selectedFolder.Path, Mode=OneWay}" />
                 </TextBlock>
             </StackPanel>
-            <ListView x:Name="watched_folder_list" 
+            <ListView x:Name="WatchedFolderList" 
                       IsItemClickEnabled="True"
+                      ItemsSource="{x:Bind fileList, Mode=OneWay}"
                       >
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding DisplayName}" />
+                        <TextBlock Text="{Binding Name}" />
                     </DataTemplate>
                 </ListView.ItemTemplate>
                 

@@ -13,7 +13,7 @@ namespace ObjectPhotoUploader
     class API
     {
         // private string _baseurl = "https://j20200007.kotsf.com";
-        private string _baseurl = "http://localhost:8000";
+        private string _baseurl = "http://aslcv2";
 
         public async Task<string> login(string username, string password)
         {

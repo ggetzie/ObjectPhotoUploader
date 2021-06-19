@@ -40,10 +40,27 @@
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png"/>
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
       </uap:VisualElements>
+      <Extensions>
+        <Extension Category="windows.backgroundTasks" EntryPoint="ObjectPhotoUploader.UploadPhotoBackgroundTask">
+          <BackgroundTasks>
+			  <Task Type="general"/>
+          </BackgroundTasks>
+        </Extension>
+	  </Extensions>
     </Application>
   </Applications>
 
   <Capabilities>
     <Capability Name="internetClient" />
+    <uap:Capability Name="picturesLibrary"/>
   </Capabilities>
+	
+  <Extensions>
+   <Extension Category="windows.activatableClass.inProcessServer">
+		<InProcessServer>
+			<Path>CLRHost.dll</Path>
+			<ActivatableClass ActivatableClassId="ObjectPhotoUploader.UploadPhotoBackgroundTask" ThreadingModel="both" />
+		</InProcessServer>
+	</Extension>
+  </Extensions>
 </Package>
