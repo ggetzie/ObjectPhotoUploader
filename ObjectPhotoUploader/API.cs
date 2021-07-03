@@ -1,12 +1,15 @@
 ﻿using Flurl;
 using Flurl.Http;
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Storage;
+using Windows.Storage.Streams;
+using System.Diagnostics;
 
 namespace ObjectPhotoUploader
 {
@@ -91,6 +94,22 @@ namespace ObjectPhotoUploader
                 .GetJsonAsync<IList<MaterialCategory>>();
             return mcs;
 
+        }
+
+        public async Task<IFlurlResponse> UploadFindPhoto(FindPhotoFile photo)
+        {
+            string token = getCurrentToken();
+            string url = _baseurl
+                .AppendPathSegment("api/find")
+                .AppendPathSegment(photo.Find.id)
+                .AppendPathSegment("photo") + "/";
+            Stream stream = await photo.LocalFile.OpenStreamForReadAsync();
+            Debug.WriteLine(stream.ToString());
+            IFlurlResponse res = await url.WithHeader("Authorization", token)
+                .PostMultipartAsync(mp => mp.AddFile("photo", stream, photo.LocalFile.Name));
+            Debug.WriteLine("Uploading {0}", photo.LocalFile.Name);
+            Debug.WriteLine(await res.GetStringAsync());
+            return res;
         }
     }
 

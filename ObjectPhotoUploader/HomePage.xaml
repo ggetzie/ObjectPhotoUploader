@@ -111,16 +111,42 @@
                 <Button x:Name="SelectFolder" Content="Select Folder" Margin="5 5 5 5" Click="SelectFolder_Click" />
                 <TextBlock Margin="5 5 10 10" VerticalAlignment="Center">
                     <Run Text="Watching Folder:"/>
-                    <Run Text="{x:Bind selectedFolder.Path, Mode=OneWay}" />
+                   <Run Text="{x:Bind SelectedFolder.Path, Mode=OneWay}" />
                 </TextBlock>
             </StackPanel>
             <ListView x:Name="WatchedFolderList" 
                       IsItemClickEnabled="True"
-                      ItemsSource="{x:Bind fileList, Mode=OneWay}"
+                      ItemsSource="{x:Bind FileList, Mode=OneWay}"
                       >
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding Name}" />
+                        <Grid Width="Auto">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition  Width="*" />
+                                <ColumnDefinition Width="100" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition MinHeight="50" />
+                            </Grid.RowDefinitions>
+                            <TextBlock                                        
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Left"
+                                Grid.Column="0"
+                                Grid.Row="0"
+                                >
+                                <Run Text="{Binding LocalFile.Name}" />
+                                <Run Text="{Binding ProgressStatus}" />
+                            </TextBlock>
+                            <ProgressBar IsIndeterminate="True" 
+                                         Visibility="{Binding ProgressVisibility}"
+                                         VerticalAlignment="Center"
+                                         HorizontalAlignment="Right"
+                                         Width="100" Margin="10,0,2,0"
+                                         Grid.Column="1"
+                                         Grid.Row="0"
+                                         />
+
+                        </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>
                 
@@ -134,6 +160,7 @@
                    />
             <ProgressBar x:Name="progbar"
                          Visibility="Collapsed"
+                         HorizontalAlignment="Right"
                          IsIndeterminate="True" Margin="20,0,-2.2,0"
                          />
         </StackPanel>
