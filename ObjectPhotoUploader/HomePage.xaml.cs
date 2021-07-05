@@ -322,11 +322,11 @@ namespace ObjectPhotoUploader
                     .FutureAccessList.AddOrReplace("PickedFolderToken", folder);
                 SelectedFolder = folder;
                 FileList.Clear();
-                var currentFiles = await SelectedFolder.GetFilesAsync();
+                IReadOnlyList<StorageFile> currentFiles = await SelectedFolder.GetFilesAsync();
                 foreach (StorageFile f in currentFiles)
                 {
                     FindPhotoFile fpFile = new FindPhotoFile(selectedFind, f, true, 100,
-                        Visibility.Collapsed, "Upload Complete");
+                        Visibility.Collapsed, "Preexisting in folder");
                     FileList.Add(fpFile);
                     WatchedFileNames.Add(f.Name);
                 }
@@ -366,6 +366,7 @@ namespace ObjectPhotoUploader
                     StorageFile changedFile = await change.GetStorageItemAsync() as StorageFile;
                     if (changedFile == null)
                     {
+                        Debug.WriteLine("Null file from change object.");
                         continue;
                     }
                     Debug.WriteLine(changedFile.Name);
@@ -385,22 +386,13 @@ namespace ObjectPhotoUploader
                         IFlurlResponse res = await api.UploadFindPhoto(newPhoto);
                         if (res.StatusCode == 201)
                         {
-                            newPhoto.Progress = 100;
-                            newPhoto.ProgressVisibility = Visibility.Collapsed;
-                            newPhoto.ProgressStatus = "Upload Complete";
                             Debug.WriteLine("Upload Successful");
-
                             await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
                                 () =>
                                 {
-                                    status.Text = "Upload Complete";
-                                    int idx = FileList.IndexOf(newPhoto);
-                                    Debug.WriteLine("Index of newPhoto - {0}", idx);
-                                    FileList[idx].ProgressVisibility = Visibility.Collapsed;
-                                    FileList[idx].Progress = 100;
-                                    FileList[idx].ProgressStatus = "Upload Complete";
-                                    
-                                    Debug.WriteLine(FileList[idx].ToString());
+                                    newPhoto.Progress = 100;
+                                    newPhoto.ProgressVisibility = Visibility.Collapsed;
+                                    newPhoto.ProgressStatus = "Upload Complete";
                                     Bindings.Update();
                                 });
                         } else

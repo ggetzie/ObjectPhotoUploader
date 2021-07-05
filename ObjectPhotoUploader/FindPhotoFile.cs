@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Storage;
@@ -16,42 +17,47 @@ namespace ObjectPhotoUploader
         public ObjectFind Find { get; set; }
         public StorageFile LocalFile { get; set; }
         public bool IsUploaded { get; set; }
-        public int Progress { get; set; }
-        //{
-        //    get
-        //    {
-        //        return Progress;
-        //    }
-        //    set
-        //    {
-        //        Progress = value;
-        //        OnPropertyChanged();
-        //    }
-        //}
-        public Visibility ProgressVisibility { get; set; }
-        //{
-        //    get
-        //    {
-        //        return ProgressVisibility;
-        //    }
-        //    set
-        //    {
-        //        ProgressVisibility = value;
-        //        OnPropertyChanged();
-        //    }
-        //}
-        public string ProgressStatus { get; set; }
-        //{
-        //    get
-        //    {
-        //        return ProgressStatus;
-        //    }
-        //    set
-        //    {
-        //        ProgressStatus = value;
-        //        OnPropertyChanged();
-        //    }
-        //}
+
+        private int _progress { get; set; }
+        public int Progress 
+        {
+            get
+            {
+                return _progress;
+            }
+            set
+            {
+                _progress = value;
+                OnPropertyChanged();
+}
+        }
+
+        private Visibility _progressVisibility { get; set; }
+        public Visibility ProgressVisibility
+        {
+            get
+            {
+                return _progressVisibility;
+            }
+            set
+            {
+                _progressVisibility = value;
+                OnPropertyChanged();
+            }
+        }
+        private string _progressStatus { get; set; }
+        public string ProgressStatus
+        {
+            get
+            {
+                return _progressStatus;
+            }
+            set
+            {
+                _progressStatus = value;
+                OnPropertyChanged();
+            }
+        }
 
         public FindPhotoFile(ObjectFind find, StorageFile localFile, bool isUploaded, int progress,
             Visibility visibility, string status)
@@ -64,7 +70,7 @@ namespace ObjectPhotoUploader
             this.ProgressStatus = status;
         }
 
-        public void OnPropertyChanged(string propertyName = null)
+        public void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
         }
