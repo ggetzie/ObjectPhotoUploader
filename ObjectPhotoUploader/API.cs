@@ -16,7 +16,22 @@ namespace ObjectPhotoUploader
     class API
     {
         // private string _baseurl = "https://j20200007.kotsf.com";
-        private string _baseurl = "http://aslcv2";
+        //private string _baseurl = 
+        private string _baseurl;
+
+        public API()
+        {
+            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+            if (localSettings.Values.ContainsKey("BASE_URL"))
+            {
+                _baseurl = (string)localSettings.Values["BASE_URL"];
+            } else
+            {
+                _baseurl = "http://aslcv2";
+            }
+
+
+        }
 
         public async Task<string> login(string username, string password)
         {

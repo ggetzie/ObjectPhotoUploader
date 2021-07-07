@@ -35,6 +35,11 @@
                 <Run Text="Selected Context:" />
                 <Run Text="{x:Bind selectedContext.ToString(), Mode=OneWay}" />
             </TextBlock>
+            <TextBlock Name="ServerURL_tb" Margin="0,0,40,0" VerticalAlignment="Center">
+                <Run Text="Current Server Url:" />
+                <Run Text="{x:Bind BaseUrl, Mode=OneWay}" />
+
+            </TextBlock>
         </StackPanel>
         <StackPanel Grid.Row="1" Orientation="Horizontal" Grid.ColumnSpan="2" VerticalAlignment="Stretch">
             <ComboBox x:Name="utm_hemisphere" Margin="0,0,10,0" VerticalAlignment="Center"

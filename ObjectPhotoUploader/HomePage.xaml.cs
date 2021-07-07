@@ -32,6 +32,7 @@ namespace ObjectPhotoUploader
     public sealed partial class HomePage : Page
     {
         string username;
+        public string BaseUrl;
         ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
 
         ObservableCollection<string> hemispheres = new ObservableCollection<string>();
@@ -61,6 +62,7 @@ namespace ObjectPhotoUploader
         {
             this.InitializeComponent();
             username = (string)localSettings.Values["username"];
+            BaseUrl = (string)localSettings.Values["BASE_URL"];
             LoadContexts();
             LoadMaterialCategories();
         }

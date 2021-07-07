@@ -29,13 +29,22 @@ namespace ObjectPhotoUploader
     {
 
         ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+        public string BaseUrl;
         public LoginPage()
         {
             this.InitializeComponent();
+            if (localSettings.Values.ContainsKey("BASE_URL"))
+            {
+                BaseUrl = (string)localSettings.Values["BASE_URL"];
+            } else
+            {
+                BaseUrl = "http://aslcv2";
+            }
         }
 
         private async void LoginButton_ClickAsync(object sender, RoutedEventArgs e)
         {
+            localSettings.Values["BASE_URL"] = URL_tb.Text;
             API api = new API();
             try
             {

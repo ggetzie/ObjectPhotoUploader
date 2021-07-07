@@ -18,6 +18,8 @@
                 <TextBlock Text="Please log in" FontSize="36"/>
                 <TextBox Name="Username" Header="Username" FontSize="18" Margin="0,8,0,0" Text=""/>
                 <PasswordBox Name="Password" Header="Password" FontSize="18" Margin="0,8,0,0"/>
+                <TextBox Name="URL_tb" Header="Server Url" FontSize="18" Margin="0, 8, 0, 0" 
+                         Text="{x:Bind BaseUrl, Mode=TwoWay}" />
                 <ProgressBar x:Name="ProgBar" IsIndeterminate="False" Visibility="Collapsed" />
                 <Button x:Name="LoginButton" Content="Log In" HorizontalAlignment="Right" Margin="0,20,0,0" FontWeight="Bold" Click="LoginButton_ClickAsync" />
             </StackPanel>
