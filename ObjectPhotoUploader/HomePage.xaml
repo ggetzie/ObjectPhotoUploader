@@ -121,7 +121,7 @@
             </StackPanel>
             <ListView x:Name="WatchedFolderList" 
                       IsItemClickEnabled="True"
-                      ItemsSource="{x:Bind FileList, Mode=OneWay}"
+                      ItemsSource="{x:Bind FileList, Mode=OneWay}" ItemClick="WatchedFolderList_ItemClick"
                       >
                 <ListView.ItemTemplate>
                     <DataTemplate>
@@ -156,6 +156,22 @@
                 </ListView.ItemTemplate>
                 
             </ListView>
+        </StackPanel>
+        <StackPanel Grid.Row="2" Grid.Column="1" 
+                    Visibility="{x:Bind DetailVisibility(), Mode=OneWay}" 
+                    Padding="10,10,0,0">
+            <TextBlock>
+                <Run Text="Selected Photo:"/>
+                <Run Text="{x:Bind SelectedPhoto.LocalFile.Name, Mode=OneWay}" />
+            </TextBlock>
+            <TextBlock>
+                <Run Text="Find:" />
+                <Run Text="{x:Bind SelectedPhoto.FindValue(), Mode=OneWay}" />
+            </TextBlock>
+            <Image Width ="600" Height="600" x:Name="Preview"
+                   ImageFailed="Preview_ImageFailed" 
+                   />
+
         </StackPanel>
 
         <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.ColumnSpan="2">

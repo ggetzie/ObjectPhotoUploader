@@ -75,7 +75,10 @@ namespace ObjectPhotoUploader
             this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        public string FindValue()
+        {
+            return (Find == null) ? "No Find Associated" : Find.ToString();
 
-
+        }
     }
 }

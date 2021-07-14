@@ -22,9 +22,11 @@ namespace ObjectPhotoUploader
         public API()
         {
             ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+            Debug.WriteLine("Initializing api");
             if (localSettings.Values.ContainsKey("BASE_URL"))
             {
                 _baseurl = (string)localSettings.Values["BASE_URL"];
+                Debug.WriteLine(string.Format("Found Base Url: {0}", _baseurl));
             } else
             {
                 _baseurl = "http://aslcv2";
@@ -35,13 +37,26 @@ namespace ObjectPhotoUploader
 
         public async Task<string> login(string username, string password)
         {
-            var url = _baseurl.AppendPathSegment("auth-token") + "/";
-            AuthToken token = await url.PostJsonAsync(new
+            string url = _baseurl.AppendPathSegment("auth-token") + "/";
+            Debug.WriteLine(string.Format("Logging in url: {0}\n", url));
+            IFlurlResponse response = await url.PostJsonAsync(new { username = username, password = password });
+
+            if (response.StatusCode == 200)
             {
-                username = username,
-                password = password
-            }).ReceiveJson<AuthToken>();
-            return token.Token;
+                AuthToken token = await response.GetJsonAsync<AuthToken>();
+                return token.Token;
+            } else
+            {
+                string responseString = await response.GetStringAsync();
+                Debug.Print(responseString);
+            }
+            return null;
+            //AuthToken token = await url.PostJsonAsync(new
+            //{
+            //    username = username,
+            //    password = password
+            //}).ReceiveJson<AuthToken>();
+            //return token.Token;
         }
 
         private string getCurrentToken()

@@ -20,6 +20,8 @@ using Flurl.Http;
 using Windows.ApplicationModel.Background;
 using Windows.UI.Core;
 using Windows.ApplicationModel.Core;
+using Windows.UI.Xaml.Media.Imaging;
+using Windows.Storage.Streams;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -56,6 +58,7 @@ namespace ObjectPhotoUploader
         private StorageLibraryChangeTracker PhotoTracker;
         private ThreadPoolTimer FileCheckTimer;
         private List<string> WatchedFileNames = new List<string>();
+        private FindPhotoFile SelectedPhoto;
 
         API api = new API();
         public HomePage()
@@ -75,6 +78,10 @@ namespace ObjectPhotoUploader
 
         private void SetLoading(bool isLoading, string msg, bool append = false)
         {
+            if (msg == null)
+            {
+                msg = "null message";
+            }
             if (append)
             {
                 status.Text += "\n" + msg;
@@ -327,7 +334,7 @@ namespace ObjectPhotoUploader
                 IReadOnlyList<StorageFile> currentFiles = await SelectedFolder.GetFilesAsync();
                 foreach (StorageFile f in currentFiles)
                 {
-                    FindPhotoFile fpFile = new FindPhotoFile(selectedFind, f, true, 100,
+                    FindPhotoFile fpFile = new FindPhotoFile(null, f, true, 100,
                         Visibility.Collapsed, "Preexisting in folder");
                     FileList.Add(fpFile);
                     WatchedFileNames.Add(f.Name);
@@ -395,6 +402,7 @@ namespace ObjectPhotoUploader
                                     newPhoto.Progress = 100;
                                     newPhoto.ProgressVisibility = Visibility.Collapsed;
                                     newPhoto.ProgressStatus = "Upload Complete";
+                                    newPhoto.IsUploaded = true;
                                     Bindings.Update();
                                 });
                         } else
@@ -457,11 +465,13 @@ namespace ObjectPhotoUploader
                         "Created New Find in current context with number {0}",
                         newFind.find_number);
                     object_find.SelectedItem = newFind.find_number;
+                    selectedFind = newFind;
                     SetLoading(false, "");
                     new_find_fo.Hide();
                     material_cb.SelectedIndex = -1;
                     category_cb.SelectedIndex = -1;
                     director_notes_tb.Text = "";
+                    Bindings.Update();
                 }
                 catch (FlurlHttpException ex)
                 {
@@ -491,6 +501,29 @@ namespace ObjectPhotoUploader
         private bool ContextIsSelected()
         {
             return !(selectedContext is null);
+        }
+
+        private Visibility DetailVisibility()
+        {
+            return (SelectedPhoto == null) ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        private async void WatchedFolderList_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            SelectedPhoto = (e.ClickedItem as FindPhotoFile);
+            using (IRandomAccessStream fileStream = await SelectedPhoto.LocalFile.OpenAsync(FileAccessMode.Read)) {
+                BitmapImage bitmapImage = new BitmapImage();
+                bitmapImage.DecodePixelWidth = 600;
+                await bitmapImage.SetSourceAsync(fileStream);
+                Preview.Source = bitmapImage;
+            }
+            Bindings.Update();
+
+        }
+
+        private void Preview_ImageFailed(object sender, ExceptionRoutedEventArgs e)
+        {
+            Debug.WriteLine("Failed to open image");
         }
     }
 }

@@ -56,9 +56,13 @@ namespace ObjectPhotoUploader
                 this.Frame.Navigate(typeof(HomePage));
             } catch (FlurlHttpException ex)
             {
-                // LoginError err = await ex.GetResponseJsonAsync<LoginError>();
+                System.Diagnostics.Debug.WriteLine(ex.Message);
                 string err = await ex.GetResponseStringAsync();
-                Status.Text = err;
+                if (err != null)
+                {
+                    Status.Text = err;
+                }
+
             } finally
             {
                 SetLoading(false);
@@ -86,3 +90,4 @@ namespace ObjectPhotoUploader
         public List<string> non_field_errors { get; set; }
     }
 }
+

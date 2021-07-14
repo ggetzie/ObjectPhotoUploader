@@ -26,6 +26,17 @@ namespace ObjectPhotoUploader
         public string category { get; set; }
         public object director_notes { get; set; }
         public List<Findphoto> findphoto_set { get; set; }
+
+        public override string ToString()
+        {
+            return string.Format("{0}.{1}.{2}.{3}.{4} - {5}",
+                this.utm_hemisphere,
+                this.utm_zone,
+                this.area_utm_easting_meters,
+                this.area_utm_northing_meters,
+                this.context_number,
+                this.find_number);
+        }
     }
 
     public class ObjectFindData
