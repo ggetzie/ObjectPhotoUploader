@@ -8,14 +8,14 @@
 
   <Identity
     Name="eee9ec23-0ffb-4495-b9fc-b9fece9160f1"
-    Publisher="CN=ggetz"
+    Publisher="CN=Kotsf Limited"
     Version="1.0.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="eee9ec23-0ffb-4495-b9fc-b9fece9160f1" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>ObjectPhotoUploader</DisplayName>
-    <PublisherDisplayName>Gabriel Getzie</PublisherDisplayName>
+    <PublisherDisplayName>Kotsf Limited</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
@@ -39,6 +39,8 @@
         BackgroundColor="transparent">
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png"/>
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
+        <uap:InitialRotationPreference>
+          <uap:Rotation Preference="landscape"/></uap:InitialRotationPreference>
       </uap:VisualElements>
       <Extensions>
         <Extension Category="windows.backgroundTasks" EntryPoint="ObjectPhotoUploader.UploadPhotoBackgroundTask">

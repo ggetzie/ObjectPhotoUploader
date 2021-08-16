@@ -16,6 +16,7 @@ using Windows.UI.Xaml.Navigation;
 using Windows.Storage;
 using Windows.System.Threading;
 using System.Collections.ObjectModel;
+using System.Text.RegularExpressions;
 using Flurl.Http;
 using Windows.ApplicationModel.Background;
 using Windows.UI.Core;
@@ -71,9 +72,46 @@ namespace ObjectPhotoUploader
         }
 
         private void logout_Click(object sender, RoutedEventArgs e)
+
         {
             localSettings.Values.Remove("AuthToken");
             Frame.Navigate(typeof(LoginPage));
+        }
+
+        private bool IsExtAllowed(string filename)
+        {
+            string AllowedExtsString;
+            string pattern = @"\.(\w+)$";
+            string ext;
+            Match m = Regex.Match(filename, pattern, RegexOptions.IgnoreCase);
+
+            if (m.Success)
+            {
+                ext = m.Groups[1].Value;
+
+            } else
+            {
+                return false;
+            }
+            if (localSettings.Values.ContainsKey("ALLOWED_EXTS"))
+            {
+                AllowedExtsString = (string)localSettings.Values["ALLOWED_EXTS"];
+            } else
+            {
+                AllowedExtsString = App.DEFAULT_EXTS;
+            }
+
+            Match extAllowed = Regex.Match(ext, AllowedExtsString, RegexOptions.IgnoreCase);
+
+            if (extAllowed.Success)
+            {
+                Debug.WriteLine(string.Format("Extension {0} is allowed", ext));
+            } else
+            {
+                Debug.WriteLine(string.Format("Won't upload {0}", ext));
+            }
+
+            return extAllowed.Success;
         }
 
         private void SetLoading(bool isLoading, string msg, bool append = false)
@@ -381,7 +419,12 @@ namespace ObjectPhotoUploader
                     Debug.WriteLine(changedFile.Name);
                     if (!WatchedFileNames.Contains(changedFile.Name))
                     {
-
+                        if (!IsExtAllowed(changedFile.Name))
+                        {
+                            Debug.WriteLine("Disallowed File extension");
+                            continue;
+                        }
+                        
                         FindPhotoFile newPhoto = new FindPhotoFile(selectedFind,
                             changedFile, false, 0, Visibility.Visible, "Uploading");
 

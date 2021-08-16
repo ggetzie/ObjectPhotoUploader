@@ -30,7 +30,8 @@ namespace ObjectPhotoUploader
         {
             this.InitializeComponent();
             this.Suspending += OnSuspending;
-        }
+            public static string DEFAULT_EXTS = "jpg, jpeg, png, raw, cr3, cr2";
+    }
 
         /// <summary>
         /// Invoked when the application is launched normally by the end user.  Other entry points

@@ -1,0 +1,47 @@
+﻿<Page
+    x:Class="ObjectPhotoUploader.Settings"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:ObjectPhotoUploader"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="11*" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <StackPanel 
+            Grid.Row="1"
+            Padding="0 20 0 20"
+            Width="600"
+            HorizontalAlignment="Center"
+         >
+            <TextBlock 
+                Text="Settings" 
+                HorizontalAlignment="Center" FontSize="24" FontWeight="Bold" 
+             />
+            <TextBox 
+                Header="Allowed File Extensions"
+                Name="fileExts" 
+                HorizontalAlignment="Center"
+                Width="600"
+            />
+            <TextBlock
+                Text="Only files with these extensions will be automatically uploaded. Enter the values, separated by commas, with no periods. Values are NOT case-sensitive. For example: jpg, jpeg, gif, bmp, raw"
+                TextWrapping="Wrap"
+                FontSize="11" FocusVisualPrimaryBrush="Gray"
+             />
+            <Button x:Name="saveSettings" 
+                    Margin="0,10,0,0"
+                    HorizontalAlignment="Right"
+             >
+                Save
+            </Button>
+        </StackPanel>
+
+    </Grid>
+</Page>
