@@ -14,6 +14,13 @@
             <RowDefinition Height="11*" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
+        <Button 
+            Grid.Row="0"
+            Style="{StaticResource NavigationBackButtonNormalStyle}"
+            IsEnabled="{x:Bind Frame.CanGoBack}"
+            ToolTipService.ToolTip="Back" Click="Back_Click"
+            x:Name="Back"
+            />
         <StackPanel 
             Grid.Row="1"
             Padding="0 20 0 20"
@@ -29,6 +36,7 @@
                 Name="fileExts" 
                 HorizontalAlignment="Center"
                 Width="600"
+                Text="{x:Bind allowedExts, Mode=TwoWay}"
             />
             <TextBlock
                 Text="Only files with these extensions will be automatically uploaded. Enter the values, separated by commas, with no periods. Values are NOT case-sensitive. For example: jpg, jpeg, gif, bmp, raw"
@@ -37,11 +45,18 @@
              />
             <Button x:Name="saveSettings" 
                     Margin="0,10,0,0"
-                    HorizontalAlignment="Right"
+                    HorizontalAlignment="Right" Click="saveSettings_Click"
              >
                 Save
             </Button>
         </StackPanel>
-
+        <TextBlock 
+            Grid.Row="2"
+            Text=""
+            FontSize="14"
+            VerticalAlignment="Center"
+            HorizontalAlignment="Center"
+            x:Name="Status"
+            />
     </Grid>
 </Page>

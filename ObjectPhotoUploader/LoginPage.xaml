@@ -10,10 +10,20 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="12*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="10*" />
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <RelativePanel Grid.Row="0" RequestedTheme="Default" Margin="10,0,-10,0">
+        <AppBarButton
+            Grid.Row="0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            Icon="Setting"
+            Label="Settings"
+            Margin="0 0 40 0" Click="AppBarButton_Click"
+         />
+
+        <RelativePanel Grid.Row="1" RequestedTheme="Default" Margin="10,0,-10,0">
             <StackPanel x:Name="LoginPanel" Margin="20" RelativePanel.AlignHorizontalCenterWithPanel="True" RelativePanel.AlignVerticalCenterWithPanel="True">
                 <TextBlock Text="Please log in" FontSize="36"/>
                 <TextBox Name="Username" Header="Username" FontSize="18" Margin="0,8,0,0" Text=""/>

@@ -21,7 +21,13 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         <StackPanel x:Name="TopControls" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" FlowDirection="RightToLeft">
-            <Button x:Name="logout" Content="Logout" HorizontalAlignment="Right" Click="logout_Click"/>
+            <AppBarButton x:Name="logout" Icon="Cancel"  Label="Logout" HorizontalAlignment="Right" Click="logout_Click"/>
+            <AppBarButton
+                x:Name="SettingsButton"
+                Icon="Setting"
+                Label="Settings"
+                Margin="25 0 25 0" Click="SettingsButton_Click"
+                />
             <TextBlock 
                 HorizontalAlignment="Right" 
                 Margin="25 0 25 0" 

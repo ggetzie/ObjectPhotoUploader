@@ -568,6 +568,11 @@ namespace ObjectPhotoUploader
         {
             Debug.WriteLine("Failed to open image");
         }
+
+        private void SettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Frame.Navigate(typeof(Settings));
+        }
     }
 }
    

@@ -36,5 +36,21 @@ namespace ObjectPhotoUploader
                 allowedExts = App.DEFAULT_EXTS;
             }
         }
+
+        private void saveSettings_Click(object sender, RoutedEventArgs e)
+        {
+            // allowedExts = fileExts.Text;
+            localSettings.Values["ALLOWED_EXTS"] = allowedExts;
+            Status.Text = "Settings saved.";
+        }
+
+        private void Back_Click(object sender, RoutedEventArgs e)
+        {
+            Frame rootFrame = Window.Current.Content as Frame;
+            if (rootFrame.CanGoBack)
+            {
+                rootFrame.GoBack();
+            }
+        }
     }
 }
