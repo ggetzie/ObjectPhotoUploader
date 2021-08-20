@@ -68,6 +68,7 @@ namespace ObjectPhotoUploader
             username = (string)localSettings.Values["username"];
             BaseUrl = (string)localSettings.Values["BASE_URL"];
             LoadContexts();
+
             LoadMaterialCategories();
         }
 
@@ -76,6 +77,42 @@ namespace ObjectPhotoUploader
         {
             localSettings.Values.Remove("AuthToken");
             Frame.Navigate(typeof(LoginPage));
+        }
+
+        private void RestoreSelectedContext(string id)
+        {
+            try
+            {
+                selectedContext = contexts.Single(x => x.id == id);
+            } catch (InvalidOperationException)
+            {
+                localSettings.Values.Remove("selectedContextId");
+                return;
+            }
+
+            utm_hemisphere.SelectedItem = selectedContext.utm_hemisphere;
+            ZoneOptions();
+            utm_zone.SelectedItem = selectedContext.utm_zone;
+            EastingOptions();
+            utm_easting.SelectedItem = selectedContext.area_utm_easting_meters;
+            northingOptions();
+            utm_northing.SelectedItem = selectedContext.area_utm_northing_meters;
+            CnOptions();
+            context_number.SelectedItem = selectedContext.context_number;
+            loadFinds();
+
+        }
+
+        private void RestoreSelectedFind(string id)
+        {
+            try
+            {
+                selectedFind = objectFinds.Single(x => x.id == id);
+                object_find.SelectedItem = selectedFind.find_number;
+            } catch (InvalidOperationException)
+            {
+                localSettings.Values.Remove("selectedFindId");
+            }
         }
 
         private bool IsExtAllowed(string filename)
@@ -93,15 +130,19 @@ namespace ObjectPhotoUploader
             {
                 return false;
             }
+            Debug.WriteLine(string.Format("Got extension {0} from {1}", ext, filename));
             if (localSettings.Values.ContainsKey("ALLOWED_EXTS"))
             {
                 AllowedExtsString = (string)localSettings.Values["ALLOWED_EXTS"];
+                Debug.WriteLine(string.Format("Found {0} in localSettings", AllowedExtsString));
             } else
             {
                 AllowedExtsString = App.DEFAULT_EXTS;
+                Debug.WriteLine(string.Format("Using default Exts {0}", AllowedExtsString));
             }
+            Debug.WriteLine(string.Format("looking for {0} in {1}", ext, AllowedExtsString));
 
-            Match extAllowed = Regex.Match(ext, AllowedExtsString, RegexOptions.IgnoreCase);
+            Match extAllowed = Regex.Match(AllowedExtsString, ext, RegexOptions.IgnoreCase);
 
             if (extAllowed.Success)
             {
@@ -139,6 +180,12 @@ namespace ObjectPhotoUploader
                 SetLoading(true, "Loading Spatial Contexts..");
                 contexts = await api.GetSpatialContextsAsync();
                 HemisphereOptions();
+                if (localSettings.Values.ContainsKey("selectedContextId") && localSettings.Values["selectedContextId"] != null)
+                {
+                    string id = localSettings.Values["selectedContextId"] as string;
+                    Debug.WriteLine(string.Format("Restoring Context {0}", id));
+                    RestoreSelectedContext(id);
+                }
                 SetLoading(false, "");
             }
             catch (FlurlHttpException ex)
@@ -325,6 +372,7 @@ namespace ObjectPhotoUploader
                     x.area_utm_northing_meters == (int)utm_northing.SelectedItem &&
                     x.context_number == (int)context_number.SelectedItem;
                 });
+                localSettings.Values["selectedContextId"] = selectedContext.id;
                 loadFinds();
             }
         }
@@ -337,6 +385,12 @@ namespace ObjectPhotoUploader
                 objectFinds = await api.GetObjectFindsAsync(selectedContext);
                 findNumbers = new ObservableCollection<int>(objectFinds.Select(x => x.find_number));
                 Bindings.Update();
+
+                if (localSettings.Values.ContainsKey("selectedFindId")) {
+                    string id = localSettings.Values["selectedFindId"] as string;
+                    RestoreSelectedFind(id);
+                }
+
                 SetLoading(false, "");
             }
             catch (FlurlHttpException ex)
@@ -350,6 +404,7 @@ namespace ObjectPhotoUploader
             if (object_find.SelectedIndex > -1)
             {
                 selectedFind = objectFinds.Single(x => x.find_number == (int)object_find.SelectedItem);
+                localSettings.Values["selectedFindId"] = selectedFind.id;
                 Bindings.Update();
             }
         }

@@ -26,11 +26,11 @@
                 x:Name="SettingsButton"
                 Icon="Setting"
                 Label="Settings"
-                Margin="25 0 25 0" Click="SettingsButton_Click"
+                Margin="0 0 25 0" Click="SettingsButton_Click"
                 />
             <TextBlock 
                 HorizontalAlignment="Right" 
-                Margin="25 0 25 0" 
+                Margin="0 0 25 0" 
                 VerticalAlignment="Center"><Run Text="Hello" /><Run Text=" "/><Run Text="{x:Bind Mode=OneWay, Path=username}" />
             </TextBlock>
             <TextBlock VerticalAlignment="Center" Margin="10, 0, 10, 0">

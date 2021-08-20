@@ -37,11 +37,15 @@ namespace ObjectPhotoUploader
             }
         }
 
-        private void saveSettings_Click(object sender, RoutedEventArgs e)
+        private async void saveSettings_Click(object sender, RoutedEventArgs e)
         {
             // allowedExts = fileExts.Text;
             localSettings.Values["ALLOWED_EXTS"] = allowedExts;
-            Status.Text = "Settings saved.";
+            Bindings.Update();
+            Status.Text = "Settings saved";
+            await System.Threading.Tasks.Task.Delay(3000);
+            Status.Text = "";
+
         }
 
         private void Back_Click(object sender, RoutedEventArgs e)

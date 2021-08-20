@@ -43,6 +43,11 @@
                 TextWrapping="Wrap"
                 FontSize="11" FocusVisualPrimaryBrush="Gray"
              />
+            <TextBlock
+                Margin="0 10 0 10"
+             >
+              <Run Text="Current Value:" /> <Run Text="{x:Bind allowedExts, Mode=OneWay}" />
+            </TextBlock>
             <Button x:Name="saveSettings" 
                     Margin="0,10,0,0"
                     HorizontalAlignment="Right" Click="saveSettings_Click"
